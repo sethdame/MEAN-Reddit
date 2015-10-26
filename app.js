@@ -1,29 +1,48 @@
-var app = angular.module('meanReddit', []);
+var app = angular.module('meanReddit', ['ui.router', 'MainCtrl', 'posts', 'PostsCtrl']);
+
+	app.config(function($stateProvider, $urlRouteProvider) {
+		$stateProvider
+			.state('home', {
+				url: '/home',
+				templateUrl: '/homeTmpl.html',
+				controller: 'MainCtrl'
+			});
+			.state('posts', {
+				url: '/posts/{id}',
+				templateUrl: '/posts.html',
+				controller: 'PostsCtrl'
+			});
+
+		$urlRouteProvider.otherwise('home');
+	});
 
 	app.factory('posts', function() {
+		var o = {
+			posts: []
+		};
+		return o;
+	});
 
-	})
-
-	app.controller('MainCtrl', function($scope){
-  		$scope.test = 'Hello world!';
-  		$scope.posts = [
-				  {title: 'post 1', upvotes: 5},
-				  {title: 'post 2', upvotes: 2},
-				  {title: 'post 3', upvotes: 15},
-				  {title: 'post 4', upvotes: 9},
-				  {title: 'post 5', upvotes: 4}
-				];
-
+	app.controller('MainCtrl', function($scope, posts){
+		$scope.posts = posts.posts;
 		$scope.addPost = function(){
 			if (!$scope.title || $scope.title === '') { return; }
 				$scope.posts.push({title: $scope.title,
 									link: $scope.link,
-								 upvotes: 0});
+								 upvotes: 0,
+								 comments: [
+								 	{author: 'Joe', body: 'Cool post!', upvotes: 0},
+								 	{author: 'Bob', body: 'Great idea but everything is wrong!', upvotes: 0}
+								 ]
+								});
 				$scope.title = '';
 				$scope.link = '';
 		};
-
 		$scope.incrementUpvotes = function(post) {
 			post.upvotes += 1;
 		};
-});
+	});
+
+	app.controller('PostsCtrl', function($scope, $stateParams, posts) {
+		$scope.post = posts.post[$stateParams.id];
+	});
